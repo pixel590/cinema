@@ -1,4 +1,7 @@
 import os
+import sys
+import keyboard
+import json
 
 list_main = []
 list_width = 16
@@ -7,13 +10,31 @@ tab = 4
 tab_mass = 4
 #общая ширина + заголовок
 total_width = (tab+1) + (list_width*tab_mass)
+save_file = "cinema_data.json" # Имя файла для хранения
+
+def save_data():
+    with open(save_file, 'w', encoding='utf-8') as f:
+        json.dump(list_main, f)
+
+def load_data():
+    if os.path.exists(save_file):
+        with open(save_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return None
 
 #Подзадача 1
 #Подзадача 9
 def mass_init():
-    for i in range(list_height):
-        temp = ["0"] * list_width
-        list_main.append(temp)
+    global list_main
+    saved_data = load_data()
+    if saved_data:
+        list_main = saved_data
+        print("--- Данные загружены из файла ---")
+    else:
+        for i in range(list_height):
+            temp = [0] * list_width
+            list_main.append(temp)
+        print("--- Создан новый зал ---")
 
 #Подзадача 5
 #Печать текста
@@ -193,6 +214,7 @@ def buy_place():
                         if(list_main[j][i] == 2):
                             list_main[j][i] = 1
                 display_cinema_print.reload()
+                save_data()
                 return 1
             case 2:
                 for j in range(list_height):
@@ -210,15 +232,18 @@ def display_menu():
     print("2. Выбрать места")
     print("3. Купить места, если есть")
     print("4. Очистить все")
+    print("5. Выход")
 
+def display_cinema_reload_and_menu():
+        display_cinema_print.reload()
+        display_menu()
+        switch_menu(only_int(input("Ваш выбор: ")))
     
 
 def switch_menu(x):
     match x:
         case 1:
-            display_cinema_print.reload()
-            display_menu()
-            switch_menu(only_int(input("Ваш выбор: ")))
+            display_cinema_reload_and_menu()
         case 2:
             edit_place.more()
             display_menu()
@@ -234,7 +259,21 @@ def switch_menu(x):
             display_cinema_print.reload()
             display_menu()
             switch_menu(only_int(input("Ваш выбор: ")))
-    
+        case 5:
+            status_exit = only_int(input("Вы точно хотите выйти?\n\t0 - Назад\n\t1 - Выйти из программы\nВвод: "))
+            if(status_exit == 1):
+                print("Подтвердите выход нажатием клавиши Enter")
+                while True:
+                    event = keyboard.read_event()
+                    if event.event_type ==keyboard.KEY_DOWN:
+                        if event.name == 'enter':
+                            print("Пока")
+                            sys.exit(0)
+                        else:
+                            display_cinema_reload_and_menu()
+                            break
+            else:
+                display_cinema_reload_and_menu()
         
 mass_init()
 display_cinema_print.legend()
