@@ -1,3 +1,4 @@
 cinema_data.json
 **/__pycache__/
 **/.vscode/
+.env
