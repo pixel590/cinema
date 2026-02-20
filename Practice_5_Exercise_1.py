@@ -8,6 +8,16 @@ list_width = 16
 list_height = 12
 tab = 4
 tab_mass = 4
+
+price_list=[]
+
+# заполнение списка цен
+for i in range(list_height):
+    cut_price = 3
+    if(i < list_height//cut_price): price_list.append(500)
+    elif(i < (list_height//cut_price)*2): price_list.append(300)
+    else: price_list.append(100)
+
 #общая ширина + заголовок
 total_width = (tab+1) + (list_width*tab_mass)
 save_file = "cinema_data.json" # Имя файла для хранения
@@ -55,7 +65,7 @@ def display_cinema_print():
         print(f"{i+1:<{tab}}", end="") #номер ряда (c нуля +1) + отступ
         for j in range(list_width):
             print(f"{list_main[i][j]:^{tab_mass}}", end="")
-        print()
+        if(i < list_height): print(f"{price_list[i]} руб.")
 
 #Вспомогательные функции
 #Очистка всего
@@ -76,6 +86,15 @@ def display_legend():
 display_cinema_print.clear = display_clear
 display_cinema_print.reload = display_reload
 display_cinema_print.legend = display_legend
+
+# Подзадача 12
+def display_price():
+    total_price = 0
+    for j in range(list_height):
+        for i in range(list_width):
+            if(list_main[j][i] == 2):
+                total_price += price_list[j]
+    print(f"\tИтоговая цена {total_price} рублей.")
 
 def only_int(x):
     try:
@@ -117,9 +136,17 @@ def edit_place_v2():
     position = y_start * list_width + x_start
     all_position = list_width * list_height
 
+    #число свободных мест
+    free_plaice = 0
+    for j in range(list_height):
+        for i in range(list_width):
+            if(list_main[j][i] == 0): free_plaice += 1
+    print(f"В зале всего {all_position} мест! Из них свободно {free_plaice}")
+
     selected = only_int(input("Введите количество мест которые хотите купить: "))
-    while selected > all_position:
-        print(f"Ошибка, в зале всего {all_position} мест!")
+
+    while selected > free_plaice:
+        print(f"Ошибка, в зале всего {all_position} мест! Из них свободно {free_plaice}!!")
         selected = only_int(input("Введите корректное число: "))
     checked = 0 #счетчик
     processed = 0#счетчик
@@ -152,6 +179,7 @@ def buy_place():
                     if list_main[j][i] == 2: check_mass_for_2_value += 1
     
     if(check_mass_for_2_value > 0):
+        display_price()
         choose = only_int(input("Вы действительно хотите купить билеты?\n\t1-Да\n\t2-Нет (очистить всe)\nВведите: "))
         match choose:
             case 1:
@@ -171,6 +199,18 @@ def buy_place():
                 return 1
     else:
         print("Ты ЕЩЁ НИЧЕГО НЕ ВЫБРАЛ!!!")
+
+#Подзадача 13
+def full_house():
+    plase_info_full_house = 0
+    for j in range(list_height):
+        for i in range(list_width):
+            if(list_main[j][i] == 1):
+                plase_info_full_house += 1
+    if (plase_info_full_house == (list_height*list_width)):
+        print("Все  места куплены! Выход из програмы. Хорошего дня!")
+        sys.exit(0)
+
 # Подзадача 9
 def display_menu():
     print(f"\n{"Меню":^{total_width}}")
@@ -221,103 +261,8 @@ def switch_menu(x):
                             break
             else:
                 display_cinema_reload_and_menu()
-        
 mass_init()
 display_cinema_print.legend()
 display_menu()
+full_house()
 switch_menu(only_int(input("Ваш выбор: ")))
-
-
-
-
-
-
-
-## ----
-## Старые функции
-
-# def edit_place():
-#     x,y = get_edit_place()
-#     list_main[y][x] = 2
-#     display_cinema_print.reload()
-# # Подзадача 5
-# #Вспомогательная функция
-# def edit_place_more_old():
-#     x,y = get_edit_place()
-    
-#     free_space = list_width-x # текущая ширина - текущая координата
-    
-#     print(f"Доступно {free_space} мест в данном ряду.")
-#     more_place = only_int(input("Количество мест: "))
-#     # Максимальное расстояние до конца
-#     while more_place <= 0:
-#         print(f"Ошибка, число больше нуля")
-#         more_place = only_int(input("Введите корректное количество мест: "))
-
-#     #подзадача 6
-#     skip = 0
-#     #если вышли за границу то
-#     if more_place>(free_space):
-#         print(f"Ошибка, от текущего места {x+1} ряд, {y+1} место. Доступно {free_space} мест.")
-#         print("Перенос на следующую строку")
-
-#         temp = more_place
-#         # print(range(y, list_height))
-#         # print(range(x, list_width))
-        
-#         for j in range(y, list_height):
-#             if(temp <= 0): break #cчетчик 
-#             if(j == y): #если это ряд начала, тогда идем до конца а потом норм цикл
-#                 for i in range(x, list_width):
-#                     #Подзадача 10
-#                     if(list_main[j][i] == 1):
-#                         print(f"Элемент {j+1} ряд {i+1} место уже куплен")
-#                         skip += 1
-#                     else:
-#                         list_main[j][i] = 2
-#                         temp -= 1
-                    
-#             else:
-#                 for i in range(list_width):
-#                     #Подзадача 10
-#                     if(list_main[j][i] == 1):
-#                         print(f"Элемент {j+1} ряд {i+1} место уже куплен")
-#                         skip += 1
-#                     else:
-#                         list_main[j][i] = 2
-#                         temp -= 1
-#                     if(temp <= 0): break
-#                     if( j == list_height and i == list_width): break
-        
-
-#         #Часть 7
-#         #если достигли конца, но темп еще не ноль, идем с начала до тех пор
-#         #пока не наступим себе на хвост
-#         if(temp > 0):
-#             for j in range(list_height):
-#                 if(temp <= 0): break #cчетчик 
-#                 for i in range(list_width):
-#                     if(j == y and i == x):
-#                         print("Ураборос!!")
-#                         break
-#                     if(temp <= 0): break #cчетчик 
-#                     #Подзадача 10
-#                     if(list_main[j][i] == 1):
-#                         print(f"Элемент {j+1} ряд {i+1} место уже куплен")
-#                         skip += 1
-#                     else:
-#                         list_main[j][i] = 2
-#                         temp -= 1
-                    
-#     else:
-#         for i in range(more_place):
-#             #Подзадача 10
-#             if(list_main[y][x+i] == 1):
-#                 print(f"Элемент {y+1} ряд {i+1} место уже куплен")
-#                 skip += 1
-#                 i -= 1 #АХАХАХААХ
-#             else:
-#                 list_main[y][x+i] = 2  
-#     print(f"Пропущено {skip}")
-#     display_cinema_print()
-# edit_place.more = edit_place_more_old
